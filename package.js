@@ -16,7 +16,8 @@ Package.onUse(function(api) {
   api.use([
     'templating',
     'mongo',
-    'underscore'
+    'underscore',
+    'reactive-var'
   ], 'client');
 
   api.addFiles([
