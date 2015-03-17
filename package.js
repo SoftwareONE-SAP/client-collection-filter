@@ -17,7 +17,8 @@ Package.onUse(function(api) {
     'templating',
     'mongo',
     'underscore',
-    'reactive-var'
+    'reactive-var',
+    'tracker'
   ], 'client');
 
   api.addFiles([
