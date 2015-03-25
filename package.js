@@ -32,6 +32,14 @@ Package.onUse(function(api) {
 
 Package.onTest(function(api) {
   api.use('tinytest');
+  api.use([
+    'templating',
+    'mongo',
+    'underscore',
+    'reactive-var',
+    'tracker'
+  ], 'client');
   api.use('centiq:client-collection-filter');
-  api.addFiles('tests.js');
+  api.addFiles('tests/filter-service-tests.js', 'client');
+  api.addFiles('tests/client-collection-filter-tests.js', 'client');
 });
