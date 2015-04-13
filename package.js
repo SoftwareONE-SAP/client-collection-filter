@@ -18,7 +18,8 @@ Package.onUse(function(api) {
     'mongo',
     'underscore',
     'reactive-var',
-    'tracker'
+    'tracker',
+    'momentjs:moment@=2.10.2'
   ], 'client');
 
   api.addFiles([
@@ -37,7 +38,8 @@ Package.onTest(function(api) {
     'mongo',
     'underscore',
     'reactive-var',
-    'tracker'
+    'tracker',
+    'momentjs:moment@=2.10.2'
   ], 'client');
   api.use('centiq:client-collection-filter');
   api.addFiles('tests/filter-service-tests.js', 'client');
