@@ -1,10 +1,10 @@
 Package.describe({
   name: 'centiq:client-collection-filter',
-  version: '0.1.1',
+  version: '0.1.2',
   // Brief, one-line summary of the package.
   summary: 'Wrap a mongo collection/array of data, and provide a filter service',
   // URL to the Git repository containing the source code for this package.
-  git: '',
+  git: 'https://github.com/Centiq/client-collection-filter',
   // By default, Meteor will default to using README.md for documentation.
   // To avoid submitting documentation, set this field to null.
   documentation: 'README.md'
