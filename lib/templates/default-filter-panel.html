@@ -1,6 +1,9 @@
 <template name="DefaultFilterPanel">
   <div class="defaultFilterPanel">
     <h1>Filter Panel</h1>
+    {{#if showTextFilter}}
+      {{> DefaultFilterPanelText}}
+    {{/if}}
     {{#each fields}}
       {{#DefaultFilterPanelField}}
         <h4><input type="checkbox" checked={{isFieldEnabled key}} />{{label}}</h4>

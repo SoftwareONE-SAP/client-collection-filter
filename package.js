@@ -44,7 +44,9 @@ Package.onUse(function(api) {
     'lib/templates/default-filter-panel-enum.html',
     'lib/templates/default-filter-panel-enum.js',
     'lib/templates/default-filter-panel-range.html',
-    'lib/templates/default-filter-panel-range.js'
+    'lib/templates/default-filter-panel-range.js',
+    'lib/templates/default-filter-panel-text.html',
+    'lib/templates/default-filter-panel-text.js'
   ], 'client');
 
   api.export('ClientCollectionFilter', 'client');

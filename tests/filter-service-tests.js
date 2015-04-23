@@ -32,8 +32,8 @@ Tinytest.add("centiq:client-collection-filter - FilterService - Instantiation", 
   test.isTrue(emptyModel._fields instanceof ReactiveVar);
   test.equal(emptyModel._fields.get(), []);
   test.equal(emptyModel._fieldMap, {});
-  test.isTrue(emptyModel._filterText instanceof ReactiveVar);
-  test.equal(emptyModel._filterText.get(), '');
+  test.isTrue(emptyModel._textFilter instanceof ReactiveVar);
+  test.equal(emptyModel._textFilter.get(), '');
   test.isTrue(emptyModel._filters instanceof ReactiveVar);
   test.equal(emptyModel._filters.get(), {});
   test.isTrue(emptyModel._generateFieldsHandle instanceof Tracker.Computation);
