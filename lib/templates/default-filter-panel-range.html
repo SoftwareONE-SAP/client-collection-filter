@@ -1,0 +1,19 @@
+<template name="DefaultFilterPanelRange">
+  {{#if options.allowTypeChange}}
+  <div>
+    <label for="rangeFilter_{{key}}_min">
+      <input {{typeAttributes 'min'}} />
+      Min
+    </label>
+    <label for="rangeFilter_{{key}}_max">
+      <input {{typeAttributes 'max'}} />
+      Max
+    </label>
+  </div>
+  {{/if}}
+  <label>
+    {{options.min}}
+    <input {{attributes}} />
+    {{options.max}} ({{options.value}})
+  </label>
+</template>

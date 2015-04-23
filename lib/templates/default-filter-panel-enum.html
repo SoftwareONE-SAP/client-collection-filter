@@ -1,0 +1,13 @@
+<template name="DefaultFilterPanelEnum">
+  {{#if options.list}}
+    <ul>
+    {{#each objectValues}}
+      <li><input type="checkbox" {{attributes}} />{{label}}</li>
+    {{/each}}
+    </ul>
+  {{else}}
+    {{#each objectValues}}
+      <button {{attributes}}>{{label}}</button>
+    {{/each}}
+  {{/if}}
+</template>

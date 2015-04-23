@@ -1,0 +1,30 @@
+<template name="DefaultFilterPanelDate">
+  {{#if options.allowTypeChange}}
+  <div>
+    <label for="dateFilter_{{key}}_before">
+      <input {{typeAttributes 'before'}} />
+      Before
+    </label>
+    <label for="dateFilter_{{key}}_after">
+      <input {{typeAttributes 'after'}} />
+      After
+    </label>
+    <label for="dateFilter_{{key}}_between">
+      <input {{typeAttributes 'between'}} />
+      Between
+    </label>
+    <label for="dateFilter_{{key}}_equals">
+      <input {{typeAttributes 'equals'}} />
+      Equals
+    </label>
+  </div>
+  {{/if}}
+  <div>
+    <label {{betweenAttributes}}>From</label>
+    <input {{attributes 'start'}} />
+  </div>
+  <div {{betweenAttributes}}>
+    <label>To</label>
+    <input {{attributes 'end'}} />
+  </div>
+</template>

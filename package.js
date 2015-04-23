@@ -13,18 +13,38 @@ Package.describe({
 Package.onUse(function(api) {
   api.versionsFrom('1.0.3.2');
 
+  /**
+   * Meteor libraries
+   */
   api.use([
     'templating',
     'mongo',
     'underscore',
     'reactive-var',
-    'tracker',
+    'tracker'
+  ], 'client');
+
+  /**
+   * External packages
+   */
+  api.use([
+    'richsilv:pikaday@=1.0.0',
     'momentjs:moment@=2.10.2'
   ], 'client');
 
   api.addFiles([
     'lib/client-collection-filter.js',
-    'lib/filter-service.js'
+    'lib/filter-service.js',
+    'lib/templates/default-filter-panel.html',
+    'lib/templates/default-filter-panel.js',
+    'lib/templates/default-filter-panel-field.html',
+    'lib/templates/default-filter-panel-field.js',
+    'lib/templates/default-filter-panel-date.html',
+    'lib/templates/default-filter-panel-date.js',
+    'lib/templates/default-filter-panel-enum.html',
+    'lib/templates/default-filter-panel-enum.js',
+    'lib/templates/default-filter-panel-range.html',
+    'lib/templates/default-filter-panel-range.js'
   ], 'client');
 
   api.export('ClientCollectionFilter', 'client');
