@@ -10,7 +10,7 @@ method of the collection, mixing in the generated filters from the
 `FilterService`.
 
 *Note: At present this has only been tested with client-side collections, not
-with any publications/subscriptions. *
+with any publications/subscriptions.*
 
 ## Modelling your filter
 
@@ -23,165 +23,239 @@ var MyFilterModel = {
     key: 'foo',
     label: 'bar',
     type: 'string'
-  }],
-  dateFilter: {
-    fn: function(startDate, endDate) {
-      return {
-        created: {
-          $gte: startDate,
-          $lte: endDate
-        }
-      };
-    }
-  }
+  }]
 };
 ```
+
+Key | Type | Description
+--- | ---- | -----------
+`fields` | `(Array)` | Array of field objects to filter on
+`textFilterLabel` | `(String)` | Optional text filter label
+
 
 ### Fields
 
 You can pass in the following values in a field object:
 
 Key | Type | Description
---- | --- | ---
+--- | ---- | -----------
 `key`  | `(String)` | `*required` The field key on the object being filtered.
 `label` | `(String)` | The text label to go show with the filter. Defaults to `key` with first letter in upper case.
 `type` | `(String)` | The type of filter, can be one of `['string', 'number', 'enum', 'range']`.  Defaults to 'string'.
+`options` | `(Object)` | A hash of options specific to the filter type
+`enabled` | `(Boolean)` | Whether the filter is initially active or not. Default: `false`
 
-The `key` is the only required property for a field object.  When just as `key`
-value is passed in, the `type` defaults to string and the text filter will apply
-to that field.
+If only a `key` value is passed in, the `type` defaults to string and the text
+filter will apply to that field.
+
+For `date`, `enum` and `range` types, you must also include the options hash.
 
 The `label` is only used in the templating.
+
+The available filter types are below.
 
 Type | Filter outcome
 -------|---------------
 `string` | Regex match `/.*sample text.*/i`
 `number` | Exact match if the text filter input can be cast to a number.
+`date` | Filters based on date values passed.
 `enum` | Requires an array of enum objects, `enumArray`, described below
 `range` | Requires a `rangeOptions` object, described below.
 
 
+### String / Number
+
+String and number types are both driven from the text filter box. 
+
+The `string` type will use regex to check if the text filter box's value is
+anywhere in the field.
+
+```javascript
+{
+  key: 'title',
+  label: 'Title',
+  type: 'string'
+}
+```
+
+The `number` type will, if the text filter box's value can be cast to a number,
+match exactly.  The `number` type assumes you are applying to a field where the
+value is a number.
+
+```javascript
+{
+  key: 'count',
+  label: 'Member count',
+  type: 'number'
+}
+```
+
+
+### Date
+
+A `date` filter will provide two dates, a `start` and `end`, and generate a
+filter based upon these values.  The `date` filter only works when the field in
+the collection has Date objects.
+
+A `date` filter requires an `options` object.
+
+Key | Type | Description
+--- | ---- | -----------
+`data` | `(Object)` | Optional, Object with optional `start` and `end` values, as Date objects, date strings or epoch times. Both `start` and `end` will default to `new Date()`
+`type` | `(String)` | Optional, used in default filtering functions, one of [`before`, `after`, `between`, `equals`]. Default: `between`
+`allowTypeChange` | `(Boolean)` | Optional, allows the type to change. Default: `false`
+
+The default filter function takes into account the type.  In the default
+template, only the `between` type shows and uses both date boxes.
+
+If `allowTypeChange` is `true`, then a set of radio buttons for changing the
+type is displayed.
+
+Type | Filter
+---- | ------
+`before` | Dates up to and including the `start` date
+`after` | Dates after and including the `start` date
+`between` | Dates between the `start` and `end dates
+`equals` | Dates matching the `start` date
+
+
+```javascript
+{
+  key: 'expiry_date',
+  label: 'Expires',
+  type: 'date',
+  options: {
+    data: {
+      start: new Date('2015-01-01'),
+      end: new Date('2015-02-01')
+    }
+  }
+}
+```
+
+
 ### Enum
 
-An enum filter will provide a set of toggle options for each option in the
-`enumArray`:
+An `enum` filter allows you to create a filter which returns documents which have
+the enabled options.  The default template can render as a set of buttons or as
+a list of checkboxes.
+
+An `enum` filter requires an `options` object.  
+
+Key | Type | Description
+--- | ---- | -----------
+`data` | `(Object)` | Required, A hash of options objects (described below)
+`list` | `(Boolean)` | Optional, used to display a list instead of buttons, default: `false`
+
+
+The options objects:
+
+Key | Type | Description
+--- | ---- | -----------
+`value` | `(String, Number, Boolean)` | Required, the value in the document
+`label` | `(String)` | Optional, label to display for this option. Default: String `value` with first character in uppercase
+`enabled` | `(Boolean)` | Optional, if the option is enabled when first rendered. Default: `false`
 
 ```javascript
 {
   key: 'status',
   label: 'Status',
   type: 'enum',
-  enumArray: [{
-    value: 0,
-    text: 'New'
-  }, {
-    value: 1,
-    text: 'Activated'
-  }, {
-    value: 3,
-    text: 'Deactivated'
-  }]
+  options: {
+    data: {
+      "0": {
+        value: 0,
+        label: 'New'
+      },
+      "1": {
+        value: 1,
+        label: 'Activated',
+        enabled: true
+      },
+      "3": {
+        value: 3,
+        label: 'Deactivated'
+      }
+    }
+  }
 }
 ```
 
-Each option can be toggled on and off by calling the `toggleEnum` method on the
-instantiated Filter Service with the field `key` and the option `value`.
-
-While not a strict enum, this allows you to order and restrict the options
-available in the filter.  Options will be displayed in the order of the
-`enumArray`.
 
 ### Range
 
-A range field is intended to be used with `<input type="range" />`.  It requires
-a `rangeOptions` object to passed in the field object.  There are two additional
-field options which are not require:, `rangeType` and `fn`.
+A `range` field is intended to be used with `<input type="range" />`.  It
+provides a slider and creates a filter with the value as an inclusive `min` or
+`max`.
+
+A `range` filter requires an `options` object.  
+
+Key | Type | Description
+--- | ---- | -----------
+`min` | `(Number)` | Required, The minimum value for the range slider
+`max` | `(Number)` | Required, The maximum value for the range slider
+`value` | `(Number)` | Optiona, The initial value for the slider, Default: `min` + ((`max` - `min`) / 2)
+`type` | `(String)` | Optional, One of [`min`, `max`], default: `max`
+`allowTypeChange` | `(Boolean)` | Optional, allows the type to change. Default: `false`
+
+If `allowTypeChange` is `true`, then a set of radio buttons for changing the
+type is displayed.
 
 An example field object:
 
 ```javascript
 {
-  key: 'range',
-  label: 'Range Between',
+  key: 'length',
+  label: 'Length',
   type: 'range',
-  rangeOptions: {
+  options: {
     min: 0,
-    max: 2000000,
-    value: 800000,
-    name: 'fieldName-range',
-    id: 'fieldNameRangeSlider'
+    max: 1000,
+    value: 100,
+    type: 'min',
+    allowTypeChange: true
   }
 }
 ```
 
-The `rangeOptions` object has the following available keys:
+## Filter functions
 
-Key | Type | Description
---- | --- | ---
-`min` | `(Number)` | `*required` Minimum value for the slider
-`max` | `(Number)` | `*required` Maximum value for the slider
-`value` | `(Number)` | Initial value for the slider. Default: `max`/2
-`name` | `(String)` | Name for the range slider
-`id` | `(String)` | Unique id for the range slider
+For the `date`, `enum`, and `range` filter types, there are default functions to
+create the filter objects.  These can be overriden by providing a function in
+the `options` object as `fn`.  This function takes one parameter, `field`, as
+the field object itself.
 
-Additional options for the field object:
+During the processing of the field object, for `date` and `enum` types, the
+`options.data` key is used to generate the `options._data` key, and your
+functions should use the values in `options._data`.  This is so reactive data
+can be used.
 
-Key | Type | Description
---- | --- | ---
-`rangeType` | `(String)` | One of `['min', 'max']` - Changes whether the filter is up to or from the `value`. Default: `max`.
-`fn` | `(Function)` | Overrides `rangeType`. A function taking a single `value` argument which returns the filter object that gets merged into the `filters()` output.
-
-The `fn` function is useful when you need more complex login for filtering your
-data. For example, if you had some invoice data with a status `0` for unpaid and
-`1` for paid, and the table displaying the data had a balance column which
-showed the `outstanding_balance` if unpaid, and the `value` if paid.  When the
-filter is applied, you want to show only the records with a balance maxixmum of
-the filter value, your `fn` function would be:
+An example `date` filter function, which checks if time between the `start_date`
+and `end_date` overlaps the date range provided:
 
 ```javascript
-fn: function(value) {
-  return {
-    $or: [{
-      status: 0,
-      outstanding_balance: {
-        $lte: value
-      }
-    }, {
-      status: 1,
-      value: {
-        $lte: value
-      }
-    }]
-  };
-}
-```
-
-### Date Filter
-
-There is a single date filter available on the FilterService.  This requires
-the `dateFilter` object to be configured.
-
-The `dateFilter` object only has two keys:
-
-Key | Type | Description
---- | --- | ---
-`label` | `(String)` | Label to display above the Date Filter.  Defaults to "Date Filter".
-`fn` | `(Function)` | `*required` A function taking two Date objects as the arguments, start and end dates, and returns the filter object to be used
-
-An example `fn` function would be:
-
-```javascript
-fn: function(value) {
-  return {
-    date: {
-      $gte: startDate,
-      $lte: endDate
+{
+  key: 'start_date',
+  label: 'Active between',
+  type: 'date',
+  options: {
+    data: {
+      start: new Date('2015-01-01'),
+      end: new Date('2015-02-01')
+    },
+    fn: function(field) {
+      return {
+        start_date: {
+          $lte: moment(field.options.end).endOf('day').toDate()
+        },
+        end_date: {
+          $gte: moment(field.options.start).startOf('day').toDate()
+        }
+      };
     }
-  };
+  }
 }
 ```
-
-
 
 ## Using
 
@@ -194,28 +268,82 @@ MyCollection = new Meteor.Collection(null);
 // The filter model
 MyCollectionModel = {};
 
-// The filter itself
-MyCollectionFilter = new FilterService(MyCollectionModel);
-
 // The filtered collection
-MyFilteredCollection = new ClientCollectionFilter(MyCollection, MyCollectionFilter);
+MyFilteredCollection = new ClientCollectionFilter(MyCollectionModel, MyCollection);
 ```
 
-The `FilterService` takes a model as described above for it's only argument.
-The `ClientCollectionFilter` takes the collection it will be filtering as the
-first argument and the `FilterService` instance for that collection as the
-second.
+The `ClientCollectionFilter` takes a model as described above for it's first
+argument (required). The second, optional, argument is the collection it will be
+filtering.  If no collection is passed, an empty client side collection is
+created, and is available on `MyFilteredCollection.collection`.  The second
+argument may also be an array of data objects, which will be passed into a
+the collection.
+
+The FilterService instance is available using the method
+`MyFilteredCollection.filter()`.
 
 You can then replace your normal `find()` call with a call to
 `MyFilteredCollection.find()`, and the filters from the `FilterService` will be
 applied to the query in a reactive manner.
 
 
+## Reactive Modelling
+
+The model can be an object, or a `ReactiveVar` containing a model object.
+Additionally, for an `enum` or `date` field, the `options.data` value can be
+a `ReactiveVar` containing the `data` object as specified above.
+
+This means you can use a `Tracker.autorun` to update the model or the `data`
+objects, and have those changes reflect on your filter panel.
+
+For example, to generate an enum for all available values in a particular field:
+
+```javascript
+DataReactiveVar = new ReactiveVar({});
+
+Model = {
+  fields: [{
+    key: 'type',
+    type: 'enum',
+    options: {
+      data: DataReactiveVar
+    }
+  }]
+};
+
+MyFilteredCollection = new ClientCollectionFilter(Model);
+
+DataTracker = Tracker.autorun(function() {
+  var newData = {}
+  MyFilteredCollection.collection.find({}, {
+    fields: {
+      type: 1
+    }
+  }).forEach(function(obj) {
+    if (_.has(newData, obj.type)) {
+      newData[obj.type].count++;
+    } else {
+      newData[obj.type] = {
+        value: obj.type,
+        count: 1
+      };
+    }
+  });
+
+  _.each(newData, function(option) {
+    option.label = option.value + ' (' + option.count + ')';
+    delete option.count;
+  });
+
+  DataReactiveVar.set(newData);
+});
+```
+
 # To do
 
-- [] Improve text filter
-- [] Provide basic templates
-- [] Refactor dateFilter to allow a field to be `date` or `dateRange` type.
-- [] Complete testing
-- [] Investigate having `$or` as root filter object instead of `$and`
-- [] Clean up argument names
+- [ ] Improve text filter
+- [x] Provide basic templates
+- [x] Refactor dateFilter to allow a field to be `date` or `dateRange` type.
+- [ ] Complete testing
+- [ ] Investigate having `$or` as root filter object instead of `$and`
+- [x] Clean up argument names
