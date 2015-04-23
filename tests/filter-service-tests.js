@@ -10,7 +10,7 @@ Tinytest.add("centiq:client-collection-filter - FilterService - Instantiation", 
   /**
    * Instantiation without a Model object throws an error
    */
-  test.throws(FilterService, 'FilterService: You must provide a `model` object for your data');
+  test.throws(FilterService, 'You must provide a `model` object for your data [FilterService-model]');
 
   /**
    * Instantiation with an array throws an error
@@ -18,7 +18,7 @@ Tinytest.add("centiq:client-collection-filter - FilterService - Instantiation", 
   var predicate = function() {
     var x = new FilterService([]);
   };
-  test.throws(predicate, 'FilterService: You must provide a `model` object for your data');
+  test.throws(predicate, 'You must provide a `model` object for your data [FilterService-model]');
 
   /**
    * Empty Model
@@ -28,16 +28,15 @@ Tinytest.add("centiq:client-collection-filter - FilterService - Instantiation", 
   /**
    * Test instantiated types
    */
-  test.equal(emptyModel._model, {});
+  test.isTrue(emptyModel._model instanceof ReactiveVar);
   test.isTrue(emptyModel._fields instanceof ReactiveVar);
   test.equal(emptyModel._fields.get(), []);
-  test.equal(emptyModel._fieldKeys, {});
+  test.equal(emptyModel._fieldMap, {});
   test.isTrue(emptyModel._filterText instanceof ReactiveVar);
   test.equal(emptyModel._filterText.get(), '');
-  test.isTrue(emptyModel._mongoFilter instanceof ReactiveVar);
-  test.equal(emptyModel._mongoFilter.get(), {});
-  test.isTrue(emptyModel._dateFilter instanceof ReactiveVar);
-  test.equal(emptyModel._dateFilter.get(), null);
+  test.isTrue(emptyModel._filters instanceof ReactiveVar);
+  test.equal(emptyModel._filters.get(), {});
+  test.isTrue(emptyModel._generateFieldsHandle instanceof Tracker.Computation);
   test.isTrue(emptyModel._generateFilterHandle instanceof Tracker.Computation);
 
   /**
@@ -52,34 +51,56 @@ Tinytest.add("centiq:client-collection-filter - FilterService - Instantiation", 
  * @type {Object}
  */
 var filterTestModel = {
-  fields: [{
+  fields: [
+  /**
+   * String (with type defined)
+   */
+  {
     key: 'foo1',
     type: 'string'
-  }, {
+  },
+  /**
+   * Number
+   */
+  {
     key: 'foo2',
     label: 'foobar',
     type: 'number'
-  }, {
+  },
+  /**
+   * Enum
+   */
+  {
     key: 'foo3',
     type: 'enum',
-    enumArray: [{
-      value: 0,
-      text: 'bar0'
-    }, {
-      value: 1,
-      text: 'bar1'
-    }]
-  }, {
+    options: {
+      data: {
+        "0": {
+          value: 0,
+          label: 'bar0'
+        },
+        "1": {
+          value: 1
+        }
+      }
+    }
+  },
+  /**
+   * Range
+   */
+  {
     key: 'foo4',
     type: 'range',
-    rangeOptions: {
-      id: 'rangeFilter',
-      name: 'range-filter',
+    options: {
       min: 0,
       max: 100,
       value: 0
     }
-  }, {
+  },
+  /**
+   * String (with no type defined)
+   */
+  {
     key: 'foo5'
   }],
   dateFilter: {
@@ -104,7 +125,7 @@ Tinytest.add("centiq:client-collection-filter - FilterService - Model Processing
   /**
    * Cached model matches what was passed in
    */
-  test.equal(withModel._model, filterTestModel);
+  test.equal(withModel._model.get(), filterTestModel);
 
   /**
    * Fields length is correct
@@ -120,123 +141,100 @@ Tinytest.add("centiq:client-collection-filter - FilterService - Model Processing
    * Label is assigned correctly
    */
   test.isTrue(_.has(fields[0], 'label'));
-  test.equal(fields[0].label, 'Foo1');
   test.isTrue(_.has(fields[1], 'label'));
-  test.equal(fields[1].label, 'foobar');
   test.isTrue(_.has(fields[2], 'label'));
-  test.equal(fields[2].label, 'Foo3');
   test.isTrue(_.has(fields[3], 'label'));
-  test.equal(fields[3].label, 'Foo4');
   test.isTrue(_.has(fields[4], 'label'));
+  test.equal(fields[0].label, 'Foo1');
+  test.equal(fields[1].label, 'foobar');
+  test.equal(fields[2].label, 'Foo3');
+  test.equal(fields[3].label, 'Foo4');
   test.equal(fields[4].label, 'Foo5');
 
   /**
    * Types pass through/are assigned correctly
    */
   test.isTrue(_.has(fields[0], 'type'));
-  test.equal(fields[0].type, 'string');
   test.isTrue(_.has(fields[1], 'type'));
-  test.equal(fields[1].type, 'number');
   test.isTrue(_.has(fields[2], 'type'));
-  test.equal(fields[2].type, 'enum');
   test.isTrue(_.has(fields[3], 'type'));
-  test.equal(fields[3].type, 'range');
   test.isTrue(_.has(fields[4], 'type'));
+  test.equal(fields[0].type, 'string');
+  test.equal(fields[1].type, 'number');
+  test.equal(fields[2].type, 'enum');
+  test.equal(fields[3].type, 'range');
   test.equal(fields[4].type, 'string');
 
   /**
-   * enumArray is an empty array for non enum types
-   */
-  test.isTrue(_.has(fields[0], 'enumArray'));
-  test.equal(fields[0].enumArray.length, 0);
-  test.isTrue(_.has(fields[1], 'enumArray'));
-  test.equal(fields[1].enumArray.length, 0);
-  test.isTrue(_.has(fields[2], 'enumArray'));
-  test.equal(fields[2].enumArray.length, 2);
-  test.isTrue(_.has(fields[3], 'enumArray'));
-  test.equal(fields[3].enumArray.length, 0);
-  test.isTrue(_.has(fields[4], 'enumArray'));
-  test.equal(fields[4].enumArray.length, 0);
-
-  /**
-   * enumStatus object is created properly for enum types
-   */
-  var enumStatus = {
-    0: {
-      index: 0,
-      enabled: true
-    },
-    1: {
-      index: 1,
-      enabled: true
-    }
-  };
-  test.isTrue(_.has(fields[0], 'enumStatus'));
-  test.equal(fields[0].enumStatus, {});
-  test.isTrue(_.has(fields[1], 'enumStatus'));
-  test.equal(fields[1].enumStatus, {});
-  test.isTrue(_.has(fields[2], 'enumStatus'));
-  test.equal(fields[2].enumStatus, enumStatus);
-  test.isTrue(_.has(fields[3], 'enumStatus'));
-  test.equal(fields[3].enumStatus, {});
-  test.isTrue(_.has(fields[4], 'enumStatus'));
-  test.equal(fields[4].enumStatus, {});
-
-  /**
-   * All fields are disabled by default
+   * Check all fields enabled status is false by default
    */
   test.isTrue(_.has(fields[0], 'enabled'));
-  test.isFalse(fields[0].enabled);
   test.isTrue(_.has(fields[1], 'enabled'));
-  test.isFalse(fields[1].enabled);
   test.isTrue(_.has(fields[2], 'enabled'));
-  test.isFalse(fields[2].enabled);
   test.isTrue(_.has(fields[3], 'enabled'));
-  test.isFalse(fields[3].enabled);
   test.isTrue(_.has(fields[4], 'enabled'));
+  test.isFalse(fields[0].enabled);
+  test.isFalse(fields[1].enabled);
+  test.isFalse(fields[2].enabled);
+  test.isFalse(fields[3].enabled);
   test.isFalse(fields[4].enabled);
+
+  /**
+   * Check all non string and non number fields have a function assigned to them
+   */
+  test.isTrue(_.has(fields[0].options, 'fn'));
+  test.isTrue(_.has(fields[1].options, 'fn'));
+  test.isTrue(_.has(fields[2].options, 'fn'));
+  test.isTrue(_.has(fields[3].options, 'fn'));
+  test.isTrue(_.has(fields[4].options, 'fn'));
+  test.isFalse(_.isFunction(fields[0].options.fn));
+  test.isFalse(_.isFunction(fields[1].options.fn));
+  test.isTrue(_.isFunction(fields[2].options.fn));
+  test.isTrue(_.isFunction(fields[3].options.fn));
+  test.isFalse(_.isFunction(fields[4].options.fn));
+
+  /**
+   * Type enum options are set correctly
+   */
+  var enumOpt = fields[2].options;
+  test.isTrue(_.has(enumOpt, '_data'));
+  test.isTrue(_.isObject(enumOpt._data));
+  test.isFalse(_.isArray(enumOpt._data));
+  test.equal(Object.keys(enumOpt._data).length, 2);
+  test.isFalse(enumOpt._data["0"].enabled);
+  test.isFalse(enumOpt._data["1"].enabled);
+  test.equal(enumOpt._data["0"].label, 'bar0');
+  test.equal(enumOpt._data["1"].label, '1');
+
 
   /**
    * rangeOptions get set/assigned properly
    */
-  test.isTrue(_.has(fields[0], 'rangeOptions'));
-  test.equal(fields[0].rangeOptions, {});
-  test.isTrue(_.has(fields[1], 'rangeOptions'));
-  test.equal(fields[1].rangeOptions, {});
-  test.isTrue(_.has(fields[2], 'rangeOptions'));
-  test.equal(fields[2].rangeOptions, {});
-  test.isTrue(_.has(fields[3], 'rangeOptions'));
-  test.equal(fields[3].rangeOptions, filterTestModel.fields[3].rangeOptions);
-  test.isTrue(_.has(fields[4], 'rangeOptions'));
-  test.equal(fields[4].rangeOptions, {});
+  var rangeOpt = fields[3].options;
+  test.isTrue(_.has(rangeOpt, 'min'));
+  test.isTrue(_.has(rangeOpt, 'max'));
+  test.isTrue(_.has(rangeOpt, 'value'));
+  test.isTrue(_.has(rangeOpt, '_data'));
+  test.isTrue(_.has(rangeOpt, '_validTypes'));
+  test.isTrue(_.has(rangeOpt, 'allowTypeChange'));
+  test.isTrue(_.has(rangeOpt, 'type'));
+  test.equal(rangeOpt.min, filterTestModel.fields[3].options.min);
+  test.equal(rangeOpt.max, filterTestModel.fields[3].options.max);
+  test.equal(rangeOpt.value, filterTestModel.fields[3].options.value);
+  test.isTrue(_.isUndefined(rangeOpt._data));
+  test.isTrue(_.isArray(rangeOpt._validTypes));
+  test.equal(rangeOpt._validTypes, ['min', 'max']);
+  test.isFalse(_.isArray(rangeOpt.allowTypeChange));
+  test.equal(rangeOpt.type, 'max');
 
   /**
-   * dateFilter base checks
+   * @todo  Add date type and test
    */
-  var df = withModel.dateFilter();
-
-  /**
-   * Check dateFilter has been set
-   */
-  test.isNotNull(df);
-
-  /**
-   * Test dateFilter defaults
-   */
-  test.isTrue(_.isFunction(df.fn));
-  test.isTrue(_.has(df, 'label'));
-  test.equal(df.label, 'Date Filter');
-  test.isTrue(_.has(df, 'enabled'));
-  test.isFalse(df.enabled);
-  test.isTrue(_.has(df, 'key'));
-  test.equal(df.key, '_dateFilter');
-  test.isTrue(_.has(df, 'startDate'));
-  test.isTrue(df.startDate instanceof Date);
-  test.isTrue(_.has(df, 'endDate'));
-  test.isTrue(df.endDate instanceof Date);
-
-  /**
-   * Test both functions output the same value
-   */
-  test.equal(df.fn(1,2), filterTestModel.dateFilter.fn(1,2));
 });
+
+/**
+ * @todo  Add tests for filter object
+ * @todo  Add tests for manipulating data
+ * @todo  Add tests for default data
+ * @todo  Add tests for reactive model
+ */
