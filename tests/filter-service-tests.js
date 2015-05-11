@@ -52,67 +52,75 @@ Tinytest.add("centiq:client-collection-filter - FilterService - Instantiation", 
  */
 var filterTestModel = {
   fields: [
-  /**
-   * String (with type defined)
-   */
-  {
-    key: 'foo1',
-    type: 'string'
-  },
-  /**
-   * Number
-   */
-  {
-    key: 'foo2',
-    label: 'foobar',
-    type: 'number'
-  },
-  /**
-   * Enum
-   */
-  {
-    key: 'foo3',
-    type: 'enum',
-    options: {
-      data: {
-        "0": {
-          value: 0,
-          label: 'bar0'
-        },
-        "1": {
-          value: 1
+    /**
+     * String (with type defined)
+     */
+    {
+      key: 'foo1',
+      type: 'string'
+    },
+    /**
+     * Number
+     */
+    {
+      key: 'foo2',
+      label: 'foobar',
+      type: 'number'
+    },
+    /**
+     * Enum
+     */
+    {
+      key: 'foo3',
+      type: 'enum',
+      options: {
+        data: {
+          "0": {
+            value: 0,
+            label: 'bar0'
+          },
+          "1": {
+            value: 1
+          }
+        }
+      }
+    },
+    /**
+     * Range
+     */
+    {
+      key: 'foo4',
+      type: 'range',
+      options: {
+        min: 0,
+        max: 100,
+        value: 0
+      }
+    },
+    /**
+     * String (with no type defined)
+     */
+    {
+      key: 'foo5'
+    },
+    /**
+     * Date
+     */
+    {
+      key: 'foo6',
+      type: 'date',
+      options: {
+        fn: function(startDate, endDate) {
+          return {
+            date: {
+              $gte: startDate,
+              $lte: endDate
+            }
+          };
         }
       }
     }
-  },
-  /**
-   * Range
-   */
-  {
-    key: 'foo4',
-    type: 'range',
-    options: {
-      min: 0,
-      max: 100,
-      value: 0
-    }
-  },
-  /**
-   * String (with no type defined)
-   */
-  {
-    key: 'foo5'
-  }],
-  dateFilter: {
-    fn: function(startDate, endDate) {
-      return {
-        date: {
-          $gte: startDate,
-          $lte: endDate
-        }
-      };
-    }
-  }
+  ]
 };
 
 /**
@@ -197,15 +205,14 @@ Tinytest.add("centiq:client-collection-filter - FilterService - Model Processing
    * Type enum options are set correctly
    */
   var enumOpt = fields[2].options;
-  test.isTrue(_.has(enumOpt, '_data'));
-  test.isTrue(_.isObject(enumOpt._data));
-  test.isFalse(_.isArray(enumOpt._data));
-  test.equal(Object.keys(enumOpt._data).length, 2);
-  test.isFalse(enumOpt._data["0"].enabled);
-  test.isFalse(enumOpt._data["1"].enabled);
-  test.equal(enumOpt._data["0"].label, 'bar0');
-  test.equal(enumOpt._data["1"].label, '1');
-
+  test.isTrue(_.has(enumOpt, 'data'));
+  test.isTrue(_.isObject(enumOpt.data));
+  test.isFalse(_.isArray(enumOpt.data));
+  test.equal(Object.keys(enumOpt.data).length, 2);
+  test.isFalse(enumOpt.data["0"].enabled);
+  test.isFalse(enumOpt.data["1"].enabled);
+  test.equal(enumOpt.data["0"].label, 'bar0');
+  test.equal(enumOpt.data["1"].label, '1');
 
   /**
    * rangeOptions get set/assigned properly
@@ -214,22 +221,33 @@ Tinytest.add("centiq:client-collection-filter - FilterService - Model Processing
   test.isTrue(_.has(rangeOpt, 'min'));
   test.isTrue(_.has(rangeOpt, 'max'));
   test.isTrue(_.has(rangeOpt, 'value'));
-  test.isTrue(_.has(rangeOpt, '_data'));
   test.isTrue(_.has(rangeOpt, '_validTypes'));
   test.isTrue(_.has(rangeOpt, 'allowTypeChange'));
   test.isTrue(_.has(rangeOpt, 'type'));
   test.equal(rangeOpt.min, filterTestModel.fields[3].options.min);
   test.equal(rangeOpt.max, filterTestModel.fields[3].options.max);
   test.equal(rangeOpt.value, filterTestModel.fields[3].options.value);
-  test.isTrue(_.isUndefined(rangeOpt._data));
+  test.isTrue(_.isUndefined(rangeOpt.data));
   test.isTrue(_.isArray(rangeOpt._validTypes));
   test.equal(rangeOpt._validTypes, ['min', 'max']);
   test.isFalse(_.isArray(rangeOpt.allowTypeChange));
   test.equal(rangeOpt.type, 'max');
 
   /**
-   * @todo  Add date type and test
+   * rangeOptions get set/assigned properly
    */
+  var dateOpt = fields[5].options;
+  test.isTrue(_.has(dateOpt, 'start'));
+  test.isTrue(_.has(dateOpt, 'end'));
+  test.isTrue(_.isDate(dateOpt.start));
+  test.isTrue(_.isDate(dateOpt.end));
+  test.isTrue(_.has(dateOpt, '_validTypes'));
+  test.isTrue(_.has(dateOpt, 'allowTypeChange'));
+  test.isTrue(_.has(dateOpt, 'type'));
+  test.isTrue(_.isUndefined(dateOpt.data));
+  test.isTrue(_.isArray(dateOpt._validTypes));
+  test.equal(dateOpt._validTypes, ['before', 'after', 'equals', 'between']);
+  test.isFalse(_.isArray(dateOpt.allowTypeChange));
 });
 
 /**
