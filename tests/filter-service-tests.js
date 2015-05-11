@@ -74,15 +74,12 @@ var filterTestModel = {
       key: 'foo3',
       type: 'enum',
       options: {
-        data: {
-          "0": {
-            value: 0,
-            label: 'bar0'
-          },
-          "1": {
-            value: 1
-          }
-        }
+        data: [{
+          value: 0,
+          label: 'bar0'
+        }, {
+          value: 1
+        }]
       }
     },
     /**
@@ -206,13 +203,12 @@ Tinytest.add("centiq:client-collection-filter - FilterService - Model Processing
    */
   var enumOpt = fields[2].options;
   test.isTrue(_.has(enumOpt, 'data'));
-  test.isTrue(_.isObject(enumOpt.data));
-  test.isFalse(_.isArray(enumOpt.data));
-  test.equal(Object.keys(enumOpt.data).length, 2);
-  test.isFalse(enumOpt.data["0"].enabled);
-  test.isFalse(enumOpt.data["1"].enabled);
-  test.equal(enumOpt.data["0"].label, 'bar0');
-  test.equal(enumOpt.data["1"].label, '1');
+  test.isTrue(_.isArray(enumOpt.data));
+  test.equal(enumOpt.data.length, 2);
+  test.isFalse(enumOpt.data[0].enabled);
+  test.isFalse(enumOpt.data[1].enabled);
+  test.equal(enumOpt.data[0].label, 'bar0');
+  test.equal(enumOpt.data[1].label, '1');
 
   /**
    * rangeOptions get set/assigned properly
