@@ -5,12 +5,14 @@
       {{> DefaultFilterPanelText}}
     {{/if}}
     {{#each fields}}
-      {{#DefaultFilterPanelField}}
-        <h4><input type="checkbox" checked={{isFieldEnabled key}} />{{label}}</h4>
+      {{#if hasDefaultPanel}}
+        {{#DefaultFilterPanelField}}
+          <h4><input type="checkbox" checked={{isFieldEnabled key}} />{{label}}</h4>
 
-        {{> Template.dynamic template=templateType}}
+          {{> Template.dynamic template=templateType}}
 
-      {{/DefaultFilterPanelField}}
+        {{/DefaultFilterPanelField}}
+      {{/if}}
     {{/each}}
   </div>
 </template>
