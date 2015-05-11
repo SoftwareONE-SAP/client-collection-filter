@@ -126,11 +126,11 @@ An `enum` filter requires an `options` object.
 
 Key | Type | Description
 --- | ---- | -----------
-`data` | `(Object)` | Required, A hash of options objects (described below)
+`data` | `(Array)` | Required, An array of options objects (described below)
 `list` | `(Boolean)` | Optional, used to display a list instead of buttons, default: `false`
 
 
-The `data` object is a has of options objects, where the key for an object is a string representation of it's `value`:
+The `data` array contains options objects:
 
 Key | Type | Description
 --- | ---- | -----------
@@ -144,21 +144,19 @@ Key | Type | Description
   label: 'Status',
   type: 'enum',
   options: {
-    data: {
-      "0": {
+    data: [
+      {
         value: 0,
         label: 'New'
-      },
-      "1": {
+      }, {
         value: 1,
         label: 'Activated',
         enabled: true
-      },
-      "3": {
+      }, {
         value: 3,
         label: 'Deactivated'
       }
-    }
+    ]
   }
 }
 ```
