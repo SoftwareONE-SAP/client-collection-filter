@@ -1,21 +1,14 @@
-**Disclaimer: This is a very early version, and still under development.  The
-API is not fixed and likely to change.  When including in your project, lock to
-a specific version**
+**Disclaimer: This is a very early version, and still under development.  The API is not fixed and likely to change.  When including in your project, lock to a specific version**
 
 # Client Collection Filtering
 
-Provides a wrapper to your collection to allow the generation of client side
-mongo queries.  The wrapper `ClientCollectionFilter` proxies just the `find()`
-method of the collection, mixing in the generated filters from the
-`FilterService`.
+Provides a wrapper to your collection to allow the generation of client side mongo queries.  The wrapper `ClientCollectionFilter` proxies just the `find()` method of the collection, mixing in the generated filters from the `FilterService`.
 
-*Note: At present this has only been tested with client-side collections, not
-with any publications/subscriptions.*
+*Note: At present this has only been tested with client-side collections, not with any publications/subscriptions.*
 
 ## Modelling your filter
 
-The `FilterService` accepts a model which describes what to allow filtering on.
-The model has a `fields` array, and a `dateFilter` object:
+The `FilterService` accepts a model which describes what to allow filtering on. The model has a `fields` array, and a `dateFilter` object:
 
 ```javascript
 var MyFilterModel = {
@@ -45,8 +38,7 @@ Key | Type | Description
 `options` | `(Object)` | A hash of options specific to the filter type
 `enabled` | `(Boolean)` | Whether the filter is initially active or not. Default: `false`
 
-If only a `key` value is passed in, the `type` defaults to string and the text
-filter will apply to that field.
+If only a `key` value is passed in, the `type` defaults to string and the text filter will apply to that field.
 
 For `date`, `enum` and `range` types, you must also include the options hash.
 
@@ -67,8 +59,7 @@ Type | Filter outcome
 
 String and number types are both driven from the text filter box. 
 
-The `string` type will use regex to check if the text filter box's value is
-anywhere in the field.
+The `string` type will use regex to check if the text filter box's value is anywhere in the field.
 
 ```javascript
 {
@@ -78,9 +69,7 @@ anywhere in the field.
 }
 ```
 
-The `number` type will, if the text filter box's value can be cast to a number,
-match exactly.  The `number` type assumes you are applying to a field where the
-value is a number.
+The `number` type will, if the text filter box's value can be cast to a number, match exactly.  The `number` type assumes you are applying to a field where the value is a number.
 
 ```javascript
 {
@@ -93,28 +82,25 @@ value is a number.
 
 ### Date
 
-A `date` filter will provide two dates, a `start` and `end`, and generate a
-filter based upon these values.  The `date` filter only works when the field in
-the collection has Date objects.
+A `date` filter will provide two dates, a `start` and `end`, and generate a filter based upon these values.  The `date` filter only works when the field in the collection has Date objects.
 
-A `date` filter requires an `options` object.
+A `date` filter does not require an `options` object.  If no options are provided, both `start` and `end` dates will default to `new Date()`.
 
 Key | Type | Description
 --- | ---- | -----------
-`data` | `(Object)` | Optional, Object with optional `start` and `end` values, as Date objects, date strings or epoch times. Both `start` and `end` will default to `new Date()`
+`start` | `(Date)` | Optional, Date object, date strings or epoch times. Default: `new Date()`
+`end` | `(Date)` | Optional, Date object, date strings or epoch times. Default: `new Date()`
 `type` | `(String)` | Optional, used in default filtering functions, one of [`before`, `after`, `between`, `equals`]. Default: `between`
 `allowTypeChange` | `(Boolean)` | Optional, allows the type to change. Default: `false`
 
-The default filter function takes into account the type.  In the default
-template, only the `between` type shows and uses both date boxes.
+The default filter function takes into account the type.  In the default template, only the `between` type shows and uses both date boxes.
 
-If `allowTypeChange` is `true`, then a set of radio buttons for changing the
-type is displayed.
+If `allowTypeChange` is `true`, then a set of radio buttons for changing the type is displayed.
 
 Type | Filter
 ---- | ------
 `before` | Dates up to and including the `start` date
-`after` | Dates after and including the `start` date
+`after` | Dates including and after the `start` date
 `between` | Dates between the `start` and `end dates
 `equals` | Dates matching the `start` date
 
@@ -125,10 +111,8 @@ Type | Filter
   label: 'Expires',
   type: 'date',
   options: {
-    data: {
-      start: new Date('2015-01-01'),
-      end: new Date('2015-02-01')
-    }
+    start: new Date('2015-01-01'),
+    end: new Date('2015-02-01')
   }
 }
 ```
@@ -136,9 +120,7 @@ Type | Filter
 
 ### Enum
 
-An `enum` filter allows you to create a filter which returns documents which have
-the enabled options.  The default template can render as a set of buttons or as
-a list of checkboxes.
+An `enum` filter allows you to create a filter which returns documents which have the enabled options.  The default template can render as a set of buttons or as a list of checkboxes.
 
 An `enum` filter requires an `options` object.  
 
@@ -148,7 +130,7 @@ Key | Type | Description
 `list` | `(Boolean)` | Optional, used to display a list instead of buttons, default: `false`
 
 
-The options objects:
+The `data` object is a has of options objects, where the key for an object is a string representation of it's `value`:
 
 Key | Type | Description
 --- | ---- | -----------
@@ -184,9 +166,7 @@ Key | Type | Description
 
 ### Range
 
-A `range` field is intended to be used with `<input type="range" />`.  It
-provides a slider and creates a filter with the value as an inclusive `min` or
-`max`.
+A `range` field is intended to be used with `<input type="range" />`.  It provides a slider and creates a filter with the value as an inclusive `min` or `max`.
 
 A `range` filter requires an `options` object.  
 
@@ -198,8 +178,7 @@ Key | Type | Description
 `type` | `(String)` | Optional, One of [`min`, `max`], default: `max`
 `allowTypeChange` | `(Boolean)` | Optional, allows the type to change. Default: `false`
 
-If `allowTypeChange` is `true`, then a set of radio buttons for changing the
-type is displayed.
+If `allowTypeChange` is `true`, then a set of radio buttons for changing the type is displayed.
 
 An example field object:
 
@@ -220,18 +199,11 @@ An example field object:
 
 ## Filter functions
 
-For the `date`, `enum`, and `range` filter types, there are default functions to
-create the filter objects.  These can be overriden by providing a function in
-the `options` object as `fn`.  This function takes one parameter, `field`, as
-the field object itself.
+For the `date`, `enum`, and `range` filter types, there are default functions to create the filter objects.  These can be overriden by providing a function in the `options` object as `fn`.  This function takes one parameter, `field`, as the field object itself.
 
-During the processing of the field object, for `date` and `enum` types, the
-`options.data` key is used to generate the `options._data` key, and your
-functions should use the values in `options._data`.  This is so reactive data
-can be used.
+During the processing of the field object, for `date` and `enum` types, the `options.data` key is used to generate the `options._data` key, and your functions should use the values in `options._data`.  This is so reactive data can be used.
 
-An example `date` filter function, which checks if time between the `start_date`
-and `end_date` overlaps the date range provided:
+An example `date` filter function, which checks if time between the `start_date` and `end_date` overlaps the date range provided:
 
 ```javascript
 {
@@ -272,29 +244,18 @@ MyCollectionModel = {};
 MyFilteredCollection = new ClientCollectionFilter(MyCollectionModel, MyCollection);
 ```
 
-The `ClientCollectionFilter` takes a model as described above for it's first
-argument (required). The second, optional, argument is the collection it will be
-filtering.  If no collection is passed, an empty client side collection is
-created, and is available on `MyFilteredCollection.collection`.  The second
-argument may also be an array of data objects, which will be passed into a
-the collection.
+The `ClientCollectionFilter` takes a model as described above for it's first argument (required). The second, optional, argument is the collection it will be filtering.  If no collection is passed, an empty client side collection is created, and is available on `MyFilteredCollection.collection`.  The second argument may also be an array of data objects, which will be passed into a the collection.
 
-The FilterService instance is available using the method
-`MyFilteredCollection.filter()`.
+The FilterService instance is available using the method `MyFilteredCollection.filter()`.
 
-You can then replace your normal `find()` call with a call to
-`MyFilteredCollection.find()`, and the filters from the `FilterService` will be
-applied to the query in a reactive manner.
+You can then replace your normal `find()` call with a call to `MyFilteredCollection.find()`, and the filters from the `FilterService` will be applied to the query in a reactive manner.
 
 
 ## Reactive Modelling
 
-The model can be an object, or a `ReactiveVar` containing a model object.
-Additionally, for an `enum` or `date` field, the `options.data` value can be
-a `ReactiveVar` containing the `data` object as specified above.
+The model can be an object, or a `ReactiveVar` containing a model object. Additionally, for an `enum` or `date` field, the `options.data` value can be a `ReactiveVar` containing the `data` object as specified above.
 
-This means you can use a `Tracker.autorun` to update the model or the `data`
-objects, and have those changes reflect on your filter panel.
+This means you can use a `Tracker.autorun` to update the model or the `data` objects, and have those changes reflect on your filter panel.
 
 For example, to generate an enum for all available values in a particular field:
 
