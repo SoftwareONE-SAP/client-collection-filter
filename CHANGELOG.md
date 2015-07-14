@@ -1,6 +1,10 @@
 Changelog
 =========
 
+### 0.3.3
+
+* Allow enum option enabled default, default: true
+
 ### 0.3.2
 
 * Add getTextFilter method
