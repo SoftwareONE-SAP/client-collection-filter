@@ -92,6 +92,7 @@ Key | Type | Description
 `end` | `(Date)` | Optional, Date object, date strings or epoch times. Default: `new Date()`
 `type` | `(String)` | Optional, used in default filtering functions, one of [`before`, `after`, `between`, `equals`]. Default: `between`
 `allowTypeChange` | `(Boolean)` | Optional, allows the type to change. Default: `false`
+`fn` | `(Function)` | Optional, function to produce custom filter object, see [Filter Functions](#filter-functions) below.
 
 The default filter function takes into account the type.  In the default template, only the `between` type shows and uses both date boxes.
 
@@ -127,7 +128,9 @@ An `enum` filter requires an `options` object.
 Key | Type | Description
 --- | ---- | -----------
 `data` | `(Array)` | Required, An array of options objects (described below)
+`default` | `(Boolean)` | Optional, default enabled value for each option if not explicitly set, default: `true`
 `list` | `(Boolean)` | Optional, used to display a list instead of buttons, default: `false`
+`fn` | `(Function)` | Optional, function to produce custom filter object, see [Filter Functions](#filter-functions) below.
 
 
 The `data` array contains options objects:
@@ -175,6 +178,7 @@ Key | Type | Description
 `value` | `(Number)` | Optiona, The initial value for the slider, Default: `min` + ((`max` - `min`) / 2)
 `type` | `(String)` | Optional, One of [`min`, `max`], default: `max`
 `allowTypeChange` | `(Boolean)` | Optional, allows the type to change. Default: `false`
+`fn` | `(Function)` | Optional, function to produce custom filter object, see [Filter Functions](#filter-functions) below.
 
 If `allowTypeChange` is `true`, then a set of radio buttons for changing the type is displayed.
 
