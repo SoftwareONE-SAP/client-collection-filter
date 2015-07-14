@@ -1,6 +1,10 @@
 Changelog
 =========
 
+### 0.3.2
+
+* Add getTextFilter method
+
 ### 0.3.1
 
 * `options.data` for enum filters must be an array, for order preservation
