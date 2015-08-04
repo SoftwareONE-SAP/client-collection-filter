@@ -1,6 +1,10 @@
 Changelog
 =========
 
+### 0.3.4
+
+* Allow custom filter types to be injected
+
 ### 0.3.3
 
 * Allow enum option enabled default, default: true
