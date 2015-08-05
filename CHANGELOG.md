@@ -1,6 +1,10 @@
 Changelog
 =========
 
+### 0.3.5
+
+* Revise structure on filters applied to collection on find request to prevent clashes
+
 ### 0.3.4
 
 * Allow custom filter types to be injected
