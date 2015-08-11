@@ -1,6 +1,10 @@
 Changelog
 =========
 
+### 0.3.7
+
+* Provide ability for functions for processing custom fields, tweak enabled/disabled
+
 ### 0.3.6
 
 * Ensure selector object on find method
