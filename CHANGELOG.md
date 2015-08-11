@@ -1,6 +1,10 @@
 Changelog
 =========
 
+### 0.3.6
+
+* Ensure selector object on find method
+
 ### 0.3.5
 
 * Revise structure on filters applied to collection on find request to prevent clashes
