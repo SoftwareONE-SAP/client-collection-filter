@@ -131,6 +131,7 @@ Key | Type | Description
 `default` | `(Boolean)` | Optional, default enabled value for each option if not explicitly set, default: `true`
 `list` | `(Boolean)` | Optional, used to display a list instead of buttons, default: `false`
 `fn` | `(Function)` | Optional, function to produce custom filter object, see [Filter Functions](#filter-functions) below.
+`resetOnDisable` | `(Boolean)` | Optional, resets enabled state of options  to the `default` if `disableAllFields()` is called on the FilterService
 
 
 The `data` array contains options objects:
