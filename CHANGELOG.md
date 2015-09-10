@@ -1,6 +1,10 @@
 Changelog
 =========
 
+### 0.3.9
+
+* Clear the text filter when disableAllFields is called
+
 ### 0.3.8
 
 * Provide ability to disable all fields, add option for enum for resetOnDisable (bool)
