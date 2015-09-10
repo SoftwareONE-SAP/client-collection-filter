@@ -1,6 +1,10 @@
 Changelog
 =========
 
+### 0.3.8
+
+* Provide ability to disable all fields, add option for enum for resetOnDisable (bool)
+
 ### 0.3.7
 
 * Provide ability for functions for processing custom fields, tweak enabled/disabled
