@@ -1,6 +1,10 @@
 Changelog
 =========
 
+### 0.3.10
+
+* Add method to set all options for an enum field
+
 ### 0.3.9
 
 * Clear the text filter when disableAllFields is called
